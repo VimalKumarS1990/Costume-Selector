@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Costume Colour Finder</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.3);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(255, 255, 255, 0.6);
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --radius-pill: 20px;
+      --radius-card: 22px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      padding: 2rem 1rem;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text-main);
+      background-color: #f1f5f9;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.16) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.14) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.16) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(168, 85, 247, 0.14) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    .container {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-card);
+      padding: 2rem;
+      max-width: 880px;
+      width: 100%;
+      box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.06);
+    }
+
+    .header-area {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.instruction {
+      color: var(--text-muted);
+      margin: 0.35rem 0 0;
+      font-size: 0.9rem;
+    }
+
+    .controls-filter-bar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .toggle-group {
+      display: inline-flex;
+      background: rgba(226, 232, 240, 0.85);
+      padding: 3px;
+      border-radius: var(--radius-pill);
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .role-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: transparent;
+      padding: 0.38rem 0.95rem;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: #64748b;
+      cursor: pointer;
+      line-height: 1.2;
+      transition: all 0.2s ease;
+    }
+
+    .role-btn svg { width: 15px; height: 15px; }
+
+    .role-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Layer Option Container */
+    .layer-toggle-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 0.5rem 0 0.5rem 0;
+    }
+
+    .checkbox-pill-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(226, 232, 240, 0.85);
+      padding: 0.45rem 1.1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .checkbox-pill-wrapper:hover { background: rgba(238, 242, 255, 0.9); }
+
+    .checkbox-pill-wrapper input[type="checkbox"] {
+      accent-color: var(--primary);
+      cursor: pointer;
+      width: 15px;
+      height: 15px;
+      margin: 0;
+    }
+
+    .upload-section {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #dropZone {
+      flex: 1;
+      min-width: 260px;
+      height: 220px;
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-pill);
+      background: rgba(248, 250, 252, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    #dropZone:hover, #dropZone.dragover {
+      border-color: var(--primary);
+      background: rgba(238, 242, 255, 0.7);
+    }
+
+    .upload-icon-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      margin-bottom: 0.6rem;
+      color: var(--primary);
+    }
+
+    .preview-container {
+      position: relative;
+      display: inline-block;
+      cursor: crosshair;
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.08);
+    }
+
+    #previewCanvas {
+      max-width: 260px;
+      max-height: 220px;
+      display: block;
+      border-radius: var(--radius-pill);
+    }
+
+    #crosshair {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px #0f172a;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      display: none;
+    }
+
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .selected-indicator {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #ffffff;
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius-pill);
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #colorSwatch {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+      flex-shrink: 0;
+    }
+
+    .color-details {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .color-details .badge {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .color-details strong {
+      font-size: 1.05rem;
+      color: var(--text-main);
+    }
+
+    .pantone-tag {
+      font-size: 0.74rem;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .color-details code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.76rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      width: 100%;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 0.45rem;
+      width: 100%;
+    }
+
+    button.main-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+      color: #ffffff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-pill);
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+      line-height: 1.2;
+      flex: 1;
+      box-shadow: 0 2px 8px var(--primary-glow);
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    button.main-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    button.btn-secondary {
+      background: #f8fafc;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+      box-shadow: none;
+    }
+
+    button.btn-secondary:hover {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    button.btn-reset {
+      background: #fff1f2;
+      color: #e11d48;
+      border: 1px solid #ffe4e6;
+      font-size: 0.78rem;
+      box-shadow: none;
+      padding: 0.45rem 0.85rem;
+    }
+
+    button.btn-reset:hover { background: #ffe4e6; }
+
+    .results-area {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+      margin-top: 1rem;
+    }
+
+    .wheel-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .wheel-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #colorWheel {
+      box-shadow: 0 8px 24px -5px rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+    }
+
+    .wheel-center-overlay {
+      position: absolute;
+      width: 105px;
+      height: 105px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .wheel-status-text {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    .wheel-sub-status {
+      font-size: 0.64rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      margin-bottom: 4px;
+      animation: pulse 0.8s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.7); opacity: 0.4; }
+      100% { transform: scale(1.3); opacity: 1; }
+    }
+
+    .hidden { display: none !important; }
+
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .harmony-card {
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: var(--radius-pill);
+      padding: 1.15rem;
+      background: #ffffff;
+      box-shadow: 0 3px 14px -3px rgba(0, 0, 0, 0.04);
+    }
+
+    .harmony-card h3 { 
+      margin: 0 0 0.25rem 0; 
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .harmony-card p.card-desc {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin: 0 0 0.9rem 0;
+    }
+
+    .swatch-row { 
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 0.65rem;
+    }
+    
+    .swatch-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.3rem;
+    }
+
+    .swatch-color-box {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,0.06);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .swatch-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      width: 100%;
+    }
+
+    .swatch-role {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .swatch-name {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .swatch-tcx {
+      font-size: 0.64rem;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .swatch-code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.68rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .accessory-card {
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: var(--radius-pill);
+      padding: 1.3rem;
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      box-shadow: 0 6px 20px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    .accessory-card h2 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .accessory-card p.card-desc {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin: 0 0 1rem 0;
+    }
+
+    .accessory-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .acc-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: var(--radius-pill);
+      padding: 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .acc-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: #1e293b;
+    }
+
+    .acc-header svg {
+      color: var(--primary);
+      width: 15px;
+      height: 15px;
+    }
+
+    .acc-swatch-row {
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .acc-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+
+    .acc-text-info strong {
+      font-size: 0.78rem;
+      color: #0f172a;
+      display: block;
+    }
+
+    .acc-text-info span {
+      font-size: 0.7rem;
+      color: #64748b;
+      display: block;
+      line-height: 1.25;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-area">
+    <h1>Costume Colour Finder</h1>
+    <p class="instruction">Upload fabric photos to detect shades automatically, or tap anywhere to sample exact dye points.</p>
+  </div>
+
+  <!-- Top Selector -->
+  <div class="controls-filter-bar">
+    <div class="toggle-group">
+      <button class="role-btn active" id="btnRoleShirt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+        Top (Shirt / Tee)
+      </button>
+      <button class="role-btn" id="btnRolePant">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v4a2 2 0 0 0 2 2h1.5a1.5 1.5 0 0 1 1.5 1.5V22h3v-9h1v9h3V9.5A1.5 1.5 0 0 1 17.5 8H19a2 2 0 0 0 2-2V2H4z"/></svg>
+        Bottom (Pant / Cargo)
+      </button>
+    </div>
+  </div>
+
+  <!-- Upload Area -->
+  <div class="upload-section">
+    <div id="dropZone">
+      <div class="upload-icon-circle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      </div>
+      <p id="dropText" style="margin: 0; font-size: 0.88rem;">Drag your <strong>Top</strong> fabric image here<br><span style="font-size: 0.78rem; color: #94a3b8;">or click to browse</span></p>
+      <input type="file" id="fileInput" accept="image/*" class="hidden">
+    </div>
+
+    <div class="preview-container hidden" id="previewArea">
+      <canvas id="previewCanvas"></canvas>
+      <div id="crosshair"></div>
+    </div>
+
+    <div class="control-panel hidden" id="extractionControls">
+      <div class="selected-indicator">
+        <div id="colorSwatch" style="background-color: #ddd;"></div>
+        <div class="color-details">
+          <span class="badge" id="detectionBadge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            Auto-Detected Top
+          </span>
+          <strong id="colorName">Scanning...</strong>
+          <span class="pantone-tag" id="tcxTag">PANTONE -- TCX</span>
+          <code id="hexValue">#000000</code>
+        </div>
+      </div>
+      
+      <div class="btn-group">
+        <button class="main-btn" id="findBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Find Matching Bottoms & Accessories
+        </button>
+        <div class="btn-row">
+          <button class="main-btn btn-secondary" id="changeImgBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9M8 17l4-4 4 4"/></svg>
+            Change
+          </button>
+          <button class="main-btn btn-reset hidden" id="resetColorBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div id="resultsArea" class="results-area hidden">
+    <!-- Wheel and Formality Filter -->
+    <div class="wheel-box">
+      <span class="wheel-label">Itten 12-Hue Fabric Dye Wheel</span>
+      
+      <div class="wheel-wrapper">
+        <canvas id="colorWheel" width="260" height="260"></canvas>
+        <div class="wheel-center-overlay" id="wheelCenter">
+          <div class="pulse-dot hidden" id="spinnerDot"></div>
+          <span class="wheel-status-text" id="wheelStatusText">Ready</span>
+          <span class="wheel-sub-status" id="wheelSubText">Itten RYB</span>
+        </div>
+      </div>
+
+      <!-- Formal / Casual Toggle Placed Directly Below Wheel -->
+      <div class="toggle-group" style="margin-top: 0.25rem;">
+        <button class="role-btn active" id="btnOccFormal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Formal / Work
+        </button>
+        <button class="role-btn" id="btnOccCasual">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+          Casual / Weekend
+        </button>
+      </div>
+    </div>
+
+    <!-- Garment Palettes -->
+    <div class="palette-grid">
+      <div class="harmony-card">
+        <h3>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          Itten Complementary
+        </h3>
+        <p class="card-desc">Subtractive opposition on fabric wheel (e.g., Blue ↔ Orange, Red ↔ Green).</p>
+        <div class="swatch-row" id="compRow"></div>
+      </div>
+
+      <div class="harmony-card">
+        <h3>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+          Analogous Dye Harmony
+        </h3>
+        <p class="card-desc">Neighboring hues in textile color theory for balanced flow.</p>
+        <div class="swatch-row" id="anaRow"></div>
+      </div>
+
+      <div class="harmony-card">
+        <h3>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Pantone Classic Neutrals
+        </h3>
+        <p class="card-desc">Standard Cotton TCX neutrals suited for everyday tailoring.</p>
+        <div class="swatch-row" id="classicRow"></div>
+      </div>
+
+      <div class="harmony-card">
+        <h3>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          Monochromatic Depth
+        </h3>
+        <p class="card-desc">Tonal tint and shade gradation within the same dye family.</p>
+        <div class="swatch-row" id="monoRow"></div>
+      </div>
+    </div>
+
+    <!-- Complete-the-Look Accessory Matrix -->
+    <div class="accessory-card">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Complete The Look: Footwear, Belt & Watch Pairings
+      </h2>
+      <p class="card-desc">Dynamically coordinated leathers, hardware metals, and watch styles for this palette.</p>
+      
+      <div class="accessory-grid">
+        <div class="acc-item">
+          <div class="acc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.5 13.5v5.5"/><path d="M7.5 12.5v5.5"/></svg>
+            Recommended Footwear
+          </div>
+          <div class="acc-swatch-row">
+            <div class="acc-dot" id="shoeDot"></div>
+            <div class="acc-text-info">
+              <strong id="shoeName">Oxford Leather</strong>
+              <span id="shoeDetails">Formal Dress Shoes</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <div class="acc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="8" x="2" y="8" rx="2"/><path d="M6 12h4"/><circle cx="17" cy="12" r="1.5"/></svg>
+            Matching Belt
+          </div>
+          <div class="acc-swatch-row">
+            <div class="acc-dot" id="beltDot"></div>
+            <div class="acc-text-info">
+              <strong id="beltName">Matched Leather</strong>
+              <span id="beltDetails">Rules: Always match shoe leather</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <div class="acc-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><polyline points="12 9 12 12 13.5 13.5"/><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7.35-3.83A2 2 0 0 1 9.83 1h4.34a2 2 0 0 1 2 1.82l.35 3.83"/></svg>
+            Watch & Hardware
+          </div>
+          <div class="acc-swatch-row">
+            <div class="acc-dot" id="watchDot"></div>
+            <div class="acc-text-info">
+              <strong id="watchName">Silver Steel / Brown Leather</strong>
+              <span id="watchDetails">Classic Dress Watch</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Layer Checkbox Placed Below Complete The Look -->
+    <div class="layer-toggle-wrapper">
+      <label class="checkbox-pill-wrapper">
+        <input type="checkbox" id="chkAddLayer">
+        <span>🧥 Add Layer (Jacket / Blazer / Overshirt)</span>
+      </label>
+    </div>
+
+    <!-- 3rd Layer Outerwear Card (Shown after checkbox) -->
+    <div class="accessory-card hidden" id="outerwearCard">
+      <h2>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+        3rd Layer: Outerwear, Jacket & Blazer Pairings
+      </h2>
+      <p class="card-desc">Calculates structured blazers, field jackets, or overshirts that frame this outfit.</p>
+      <div class="swatch-row" id="layerRow"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PANTONE_TCX_DB = [
+    { tcx: "19-4052 TCX", name: "Classic Blue", r: 15, g: 76, b: 129 },
+    { tcx: "19-3832 TCX", name: "Navy Peony", r: 34, g: 58, b: 94 },
+    { tcx: "19-4010 TCX", name: "Total Eclipse", r: 35, g: 39, b: 55 },
+    { tcx: "19-3911 TCX", name: "Black Onyx", r: 43, g: 45, b: 47 },
+    { tcx: "19-0303 TCX", name: "Jet Black", r: 19, g: 20, b: 24 },
+    { tcx: "18-0403 TCX", name: "Dark Gull Gray", r: 98, g: 93, b: 93 },
+    { tcx: "14-4102 TCX", name: "Glacier Gray", r: 197, g: 200, b: 202 },
+    { tcx: "11-0601 TCX", name: "Bright White", r: 244, g: 245, b: 240 },
+    { tcx: "11-0105 TCX", name: "Antique White", r: 238, g: 230, b: 217 },
+    { tcx: "13-0905 TCX", name: "Birch / Ecru", r: 221, g: 207, b: 186 },
+    { tcx: "16-1334 TCX", name: "Tan / Camel", r: 179, g: 139, b: 109 },
+    { tcx: "17-1118 TCX", name: "Khaki Chino", r: 163, g: 146, b: 114 },
+    { tcx: "19-1218 TCX", name: "Potting Soil Brown", r: 66, g: 46, b: 35 },
+    { tcx: "18-1244 TCX", name: "Ginger Bread / Rust", r: 142, g: 71, b: 42 },
+    { tcx: "19-1557 TCX", name: "Chili Pepper Red", r: 155, g: 27, b: 48 },
+    { tcx: "19-1650 TCX", name: "Biking Red / Burgundy", r: 119, g: 33, b: 49 },
+    { tcx: "17-1463 TCX", name: "Tangerine Tango", r: 221, g: 65, b: 36 },
+    { tcx: "14-1315 TCX", name: "Peach Puree", r: 239, g: 187, b: 170 },
+    { tcx: "14-1064 TCX", name: "Minion Yellow", r: 245, g: 224, b: 80 },
+    { tcx: "18-0950 TCX", name: "Spicy Mustard", r: 216, g: 157, b: 34 },
+    { tcx: "18-0107 TCX", name: "Kale / Olive", r: 92, g: 103, b: 68 },
+    { tcx: "16-0421 TCX", name: "Sage Green", r: 153, g: 164, b: 133 },
+    { tcx: "17-5641 TCX", name: "Emerald", r: 0, g: 147, b: 108 },
+    { tcx: "19-5411 TCX", name: "Pine Grove / Forest", r: 19, g: 66, b: 54 },
+    { tcx: "19-4524 TCX", name: "Shaded Spruce / Teal", r: 0, g: 89, b: 97 },
+    { tcx: "14-4115 TCX", name: "Cerulean Sky", r: 155, g: 183, b: 212 },
+    { tcx: "18-3838 TCX", name: "Ultra Violet", r: 95, g: 75, b: 139 },
+    { tcx: "19-2428 TCX", name: "Magenta Haze", r: 141, g: 46, b: 85 },
+    { tcx: "13-1520 TCX", name: "Rose Quartz", r: 247, g: 202, b: 201 }
+  ];
+
+  function getClosestPantone(r, g, b) {
+    let minDistance = Infinity;
+    let match = PANTONE_TCX_DB[0];
+    for (const p of PANTONE_TCX_DB) {
+      const dist = Math.sqrt((r - p.r)**2 + (g - p.g)**2 + (b - p.b)**2);
+      if (dist < minDistance) {
+        minDistance = dist;
+        match = p;
+      }
+    }
+    return match;
+  }
+
+  const ITTEN_HUES = [
+    { ryb: 0,   name: "Red",           hex: "#E51932" },
+    { ryb: 30,  name: "Red-Orange",    hex: "#F05A24" },
+    { ryb: 60,  name: "Orange",        hex: "#F7931E" },
+    { ryb: 90,  name: "Yellow-Orange", hex: "#FBBA15" },
+    { ryb: 120, name: "Yellow",        hex: "#FFEE00" },
+    { ryb: 150, name: "Yellow-Green",  hex: "#8CC63F" },
+    { ryb: 180, name: "Green",         hex: "#009245" },
+    { ryb: 210, name: "Blue-Green",    hex: "#00A99D" },
+    { ryb: 240, name: "Blue",          hex: "#0071BC" },
+    { ryb: 270, name: "Blue-Violet",   hex: "#2E3192" },
+    { ryb: 300, name: "Violet",        hex: "#662D91" },
+    { ryb: 330, name: "Red-Violet",    hex: "#9E005D" }
+  ];
+
+  function rgbHueToRYBHue(rgbHue) {
+    if (rgbHue >= 0 && rgbHue < 60) return (rgbHue / 60) * 120;
+    if (rgbHue >= 60 && rgbHue < 120) return 120 + ((rgbHue - 60) / 60) * 60;
+    if (rgbHue >= 120 && rgbHue < 240) return 180 + ((rgbHue - 120) / 120) * 60;
+    return 240 + ((rgbHue - 240) / 120) * 120;
+  }
+
+  function rybHueToRGBHue(rybHue) {
+    rybHue = (rybHue % 360 + 360) % 360;
+    if (rybHue >= 0 && rybHue < 120) return (rybHue / 120) * 60;
+    if (rybHue >= 120 && rybHue < 180) return 60 + ((rybHue - 120) / 60) * 60;
+    if (rybHue >= 180 && rybHue < 240) return 120 + ((rybHue - 180) / 60) * 120;
+    return 240 + ((rybHue - 240) / 120) * 120;
+  }
+
+  let currentRole = 'shirt';
+  let currentOccasion = 'formal';
+  let dominantHSL = null;
+  let autoDetectedRGB = null;
+  let rotationAngle = 0;
+  let isSpinning = false;
+  let isImageLoaded = false;
+
+  const btnRoleShirt = document.getElementById('btnRoleShirt');
+  const btnRolePant = document.getElementById('btnRolePant');
+  const btnOccFormal = document.getElementById('btnOccFormal');
+  const btnOccCasual = document.getElementById('btnOccCasual');
+  const chkAddLayer = document.getElementById('chkAddLayer');
+  const dropText = document.getElementById('dropText');
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const previewArea = document.getElementById('previewArea');
+  const previewCanvas = document.getElementById('previewCanvas');
+  const previewCtx = previewCanvas.getContext('2d', { willReadFrequently: true });
+  const crosshair = document.getElementById('crosshair');
+  const controls = document.getElementById('extractionControls');
+  const swatch = document.getElementById('colorSwatch');
+  const colorNameLabel = document.getElementById('colorName');
+  const tcxTag = document.getElementById('tcxTag');
+  const hexLabel = document.getElementById('hexValue');
+  const badgeLabel = document.getElementById('detectionBadge');
+  const findBtn = document.getElementById('findBtn');
+  const changeImgBtn = document.getElementById('changeImgBtn');
+  const resetColorBtn = document.getElementById('resetColorBtn');
+  const resultsArea = document.getElementById('resultsArea');
+  const wheelCanvas = document.getElementById('colorWheel');
+  const wheelCtx = wheelCanvas.getContext('2d');
+  const wheelStatusText = document.getElementById('wheelStatusText');
+  const wheelSubText = document.getElementById('wheelSubText');
+  const spinnerDot = document.getElementById('spinnerDot');
+  const outerwearCard = document.getElementById('outerwearCard');
+
+  const shoeDot = document.getElementById('shoeDot');
+  const shoeName = document.getElementById('shoeName');
+  const shoeDetails = document.getElementById('shoeDetails');
+  const beltDot = document.getElementById('beltDot');
+  const beltName = document.getElementById('beltName');
+  const beltDetails = document.getElementById('beltDetails');
+  const watchDot = document.getElementById('watchDot');
+  const watchName = document.getElementById('watchName');
+  const watchDetails = document.getElementById('watchDetails');
+
+  btnRoleShirt.addEventListener('click', () => setRole('shirt'));
+  btnRolePant.addEventListener('click', () => setRole('pant'));
+
+  function setRole(role) {
+    currentRole = role;
+    if (role === 'shirt') {
+      btnRoleShirt.classList.add('active');
+      btnRolePant.classList.remove('active');
+      dropText.innerHTML = `Drag your <strong>Top</strong> fabric image here<br><span style="font-size: 0.78rem; color: #94a3b8;">or click to browse</span>`;
+      findBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Find Matching Bottoms & Accessories`;
+      badgeLabel.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${isImageLoaded && resetColorBtn.classList.contains('hidden') ? "Auto-Detected Top" : "Selected Top"}`;
+    } else {
+      btnRolePant.classList.add('active');
+      btnRoleShirt.classList.remove('active');
+      dropText.innerHTML = `Drag your <strong>Bottom</strong> fabric image here<br><span style="font-size: 0.78rem; color: #94a3b8;">or click to browse</span>`;
+      findBtn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Find Matching Tops & Accessories`;
+      badgeLabel.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${isImageLoaded && resetColorBtn.classList.contains('hidden') ? "Auto-Detected Bottom" : "Selected Bottom"}`;
+    }
+    if (!resultsArea.classList.contains('hidden') && dominantHSL) renderPalettes();
+  }
+
+  btnOccFormal.addEventListener('click', () => setOccasion('formal'));
+  btnOccCasual.addEventListener('click', () => setOccasion('casual'));
+
+  function setOccasion(occ) {
+    currentOccasion = occ;
+    if (occ === 'formal') {
+      btnOccFormal.classList.add('active');
+      btnOccCasual.classList.remove('active');
+    } else {
+      btnOccCasual.classList.add('active');
+      btnOccFormal.classList.remove('active');
+    }
+    if (!resultsArea.classList.contains('hidden') && dominantHSL) renderPalettes();
+  }
+
+  chkAddLayer.addEventListener('change', () => {
+    if (!resultsArea.classList.contains('hidden') && dominantHSL) {
+      renderPalettes();
+    }
+  });
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  changeImgBtn.addEventListener('click', () => {
+    fileInput.value = '';
+    previewArea.classList.add('hidden');
+    controls.classList.add('hidden');
+    resultsArea.classList.add('hidden');
+    dropZone.classList.remove('hidden');
+    resetColorBtn.classList.add('hidden');
+    isImageLoaded = false;
+    autoDetectedRGB = null;
+  });
+
+  resetColorBtn.addEventListener('click', () => {
+    if (!autoDetectedRGB) return;
+    badgeLabel.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${currentRole === 'shirt' ? "Auto-Detected Top" : "Auto-Detected Bottom"}`;
+    updateSelectedColor(autoDetectedRGB.r, autoDetectedRGB.g, autoDetectedRGB.b);
+    resetColorBtn.classList.add('hidden');
+  });
+
+  function handleFiles(files) {
+    if (!files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => processImage(img);
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(files[0]);
+  }
+
+  function processImage(img) {
+    resultsArea.classList.add('hidden');
+    dropZone.classList.add('hidden');
+    previewArea.classList.remove('hidden');
+    controls.classList.remove('hidden');
+    resetColorBtn.classList.add('hidden');
+
+    const scale = Math.min(260 / img.width, 220 / img.height);
+    const w = Math.floor(img.width * scale);
+    const h = Math.floor(img.height * scale);
+    previewCanvas.width = w;
+    previewCanvas.height = h;
+    previewCtx.drawImage(img, 0, 0, w, h);
+    isImageLoaded = true;
+
+    autoExtractColor(w, h);
+  }
+
+  function autoExtractColor(w, h) {
+    const sx = Math.floor(w * 0.3);
+    const sy = Math.floor(h * 0.3);
+    const sw = Math.floor(w * 0.4);
+    const sh = Math.floor(h * 0.4);
+    const imageData = previewCtx.getImageData(sx, sy, sw, sh).data;
+
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < imageData.length; i += 16) {
+      r += imageData[i];
+      g += imageData[i + 1];
+      b += imageData[i + 2];
+      count++;
+    }
+
+    const avgR = Math.round(r / count);
+    const avgG = Math.round(g / count);
+    const avgB = Math.round(b / count);
+
+    autoDetectedRGB = { r: avgR, g: avgG, b: avgB };
+    badgeLabel.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${currentRole === 'shirt' ? "Auto-Detected Top" : "Auto-Detected Bottom"}`;
+    updateSelectedColor(avgR, avgG, avgB);
+  }
+
+  function updateSelectedColor(r, g, b) {
+    dominantHSL = rgbToHSL(r, g, b);
+    const hex = rgbToHex(r, g, b);
+    const pantone = getClosestPantone(r, g, b);
+
+    swatch.style.backgroundColor = hex;
+    colorNameLabel.textContent = pantone.name;
+    tcxTag.textContent = `PANTONE ${pantone.tcx}`;
+    hexLabel.textContent = hex.toUpperCase();
+    findBtn.disabled = false;
+  }
+
+  previewArea.addEventListener('mousemove', (e) => {
+    if (!isImageLoaded) return;
+    updateCrosshair(e);
+  });
+
+  previewArea.addEventListener('touchmove', (e) => {
+    if (!isImageLoaded || !e.touches.length) return;
+    e.preventDefault();
+    updateCrosshair(e.touches[0]);
+  }, { passive: false });
+
+  previewArea.addEventListener('mouseleave', () => crosshair.style.display = 'none');
+
+  const pickExactPixel = (e) => {
+    if (!isImageLoaded || isSpinning) return;
+    const rect = previewCanvas.getBoundingClientRect();
+    const x = Math.floor(e.clientX - rect.left);
+    const y = Math.floor(e.clientY - rect.top);
+
+    if (x < 0 || y < 0 || x >= previewCanvas.width || y >= previewCanvas.height) return;
+
+    const pixel = previewCtx.getImageData(x, y, 1, 1).data;
+    badgeLabel.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${currentRole === 'shirt' ? "Picked Top" : "Picked Bottom"}`;
+    updateSelectedColor(pixel[0], pixel[1], pixel[2]);
+    resetColorBtn.classList.remove('hidden');
+  };
+
+  previewArea.addEventListener('click', pickExactPixel);
+  previewArea.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length) pickExactPixel(e.changedTouches[0]);
+  });
+
+  function updateCrosshair(e) {
+    const rect = previewArea.getBoundingClientRect();
+    crosshair.style.display = 'block';
+    crosshair.style.left = `${e.clientX - rect.left}px`;
+    crosshair.style.top = `${e.clientY - rect.top}px`;
+  }
+
+  function drawWheel(angle, showMarkers = false) {
+    const size = wheelCanvas.width;
+    const r = size / 2;
+    wheelCtx.clearRect(0, 0, size, size);
+
+    wheelCtx.save();
+    wheelCtx.translate(r, r);
+    wheelCtx.rotate(angle * Math.PI / 180);
+
+    for (let i = 0; i < 12; i++) {
+      const segAngle = i * 30;
+      wheelCtx.beginPath();
+      wheelCtx.moveTo(0, 0);
+      wheelCtx.arc(0, 0, r - 5, (segAngle - 15 - 90) * Math.PI / 180, (segAngle + 15 - 90) * Math.PI / 180);
+      wheelCtx.closePath();
+      wheelCtx.fillStyle = ITTEN_HUES[i].hex;
+      wheelCtx.fill();
+      wheelCtx.strokeStyle = '#fff';
+      wheelCtx.lineWidth = 2.5;
+      wheelCtx.stroke();
+    }
+    wheelCtx.restore();
+
+    if (showMarkers) {
+      drawMarker(r, 270, '#0f172a', 8);
+      drawMarker(r, 90, '#ffffff', 7, '#0f172a');
+    }
+  }
+
+  function drawMarker(centerR, angleDeg, color, size, stroke = null) {
+    const angleRad = angleDeg * Math.PI / 180;
+    const dist = centerR * 0.85;
+    const x = centerR + dist * Math.cos(angleRad);
+    const y = centerR + dist * Math.sin(angleRad);
+
+    wheelCtx.beginPath();
+    wheelCtx.arc(x, y, size, 0, 2 * Math.PI);
+    wheelCtx.fillStyle = color;
+    wheelCtx.fill();
+    if (stroke) {
+      wheelCtx.strokeStyle = stroke;
+      wheelCtx.lineWidth = 2;
+      wheelCtx.stroke();
+    }
+  }
+
+  findBtn.addEventListener('click', () => {
+    if (isSpinning || !dominantHSL) return;
+    startSpin();
+  });
+
+  function startSpin() {
+    isSpinning = true;
+    resultsArea.classList.remove('hidden');
+    resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+    spinnerDot.classList.remove('hidden');
+    wheelStatusText.textContent = "Finding Match...";
+    wheelSubText.textContent = currentOccasion === 'formal' ? "Formal Dyes" : "Casual Flow";
+
+    const speed = 32;
+    const duration = 2000;
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const currentSpeed = speed * (1 - easeOutQuad);
+
+      rotationAngle += currentSpeed;
+      drawWheel(rotationAngle);
+
+      if (elapsed < duration) {
+        requestAnimationFrame(animate);
+      } else {
+        isSpinning = false;
+        spinnerDot.classList.add('hidden');
+        wheelStatusText.textContent = "Match Found ✓";
+        wheelSubText.textContent = "Itten RYB";
+        
+        drawWheel(rotationAngle, true);
+        renderPalettes();
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function renderPalettes() {
+    const { h, s, l } = dominantHSL;
+    const isShirt = currentRole === 'shirt';
+    const isFormal = currentOccasion === 'formal';
+    const chosenRoleLabel = isShirt ? "Your Top" : "Your Bottom";
+    const matchRoleLabel = isShirt ? "Bottom Match" : "Top Match";
+
+    const addSwatch = (rowId, hex, role) => {
+      const rgb = hexToRGB(hex);
+      const p = getClosestPantone(rgb.r, rgb.g, rgb.b);
+
+      const row = document.getElementById(rowId);
+      const item = document.createElement('div');
+      item.className = 'swatch-item';
+
+      item.innerHTML = `
+        <div class="swatch-color-box" style="background-color: ${hex};"></div>
+        <div class="swatch-info">
+          <span class="swatch-role">${role}</span>
+          <span class="swatch-name" title="${p.name}">${p.name}</span>
+          <span class="swatch-tcx">${p.tcx}</span>
+          <span class="swatch-code">${hex.toUpperCase()}</span>
+        </div>
+      `;
+      row.appendChild(item);
+    };
+
+    ['compRow', 'anaRow', 'classicRow', 'monoRow'].forEach(id => document.getElementById(id).innerHTML = '');
+
+    const baseHex = hslToHex(h, s, l);
+    addSwatch('compRow', baseHex, chosenRoleLabel);
+    addSwatch('anaRow', baseHex, chosenRoleLabel);
+    addSwatch('classicRow', baseHex, chosenRoleLabel);
+    addSwatch('monoRow', baseHex, chosenRoleLabel);
+
+    // 1. Itten RYB Complementary
+    const baseRYBHue = rgbHueToRYBHue(h);
+    const compRYBHue = (baseRYBHue + 180) % 360;
+    const compRGBHue = rybHueToRGBHue(compRYBHue);
+    const compSat = isFormal ? Math.min(s, 45) : Math.min(s, 70);
+    const compLightness = isShirt 
+      ? (isFormal ? Math.max(18, Math.min(40, 100 - l)) : Math.max(25, Math.min(60, 100 - l))) 
+      : (isFormal ? Math.min(88, Math.max(65, 100 - l)) : Math.min(80, Math.max(50, 100 - l)));
+
+    const compHex = hslToHex(compRGBHue, compSat, compLightness);
+    addSwatch('compRow', compHex, `${matchRoleLabel} (Itten RYB)`);
+
+    // 2. Itten RYB Analogous
+    const ana1RGBHue = rybHueToRGBHue((baseRYBHue - 30 + 360) % 360);
+    const ana2RGBHue = rybHueToRGBHue((baseRYBHue + 30) % 360);
+    const anaSat = isFormal ? Math.min(s, 40) : Math.min(s, 65);
+    const ana1 = hslToHex(ana1RGBHue, anaSat, isShirt ? Math.max(22, l - 18) : Math.min(82, l + 18));
+    const ana2 = hslToHex(ana2RGBHue, anaSat, isShirt ? Math.max(22, l - 18) : Math.min(82, l + 18));
+    addSwatch('anaRow', ana1, `${matchRoleLabel} 1`);
+    addSwatch('anaRow', ana2, `${matchRoleLabel} 2`);
+
+    // 3. Classic Pantone TCX Neutrals
+    if (isShirt) {
+      if (isFormal) {
+        addSwatch('classicRow', '#162744', 'Navy Peony TCX');
+        addSwatch('classicRow', '#2B2D2F', 'Black Onyx TCX');
+        addSwatch('classicRow', '#625D5D', 'Dark Gull Gray TCX');
+      } else {
+        addSwatch('classicRow', '#A39272', 'Khaki Chino TCX');
+        addSwatch('classicRow', '#B38B6D', 'Tan / Camel TCX');
+        addSwatch('classicRow', '#5C6744', 'Kale / Olive TCX');
+      }
+    } else {
+      if (isFormal) {
+        addSwatch('classicRow', '#F4F5F0', 'Bright White TCX');
+        addSwatch('classicRow', '#C5C8CA', 'Glacier Gray TCX');
+        addSwatch('classicRow', '#9BB7D4', 'Cerulean Sky TCX');
+      } else {
+        addSwatch('classicRow', '#DDCFBA', 'Birch / Ecru TCX');
+        addSwatch('classicRow', '#EFBBAA', 'Peach Puree TCX');
+        addSwatch('classicRow', '#F7CACA', 'Rose Quartz TCX');
+      }
+    }
+
+    // 4. Monochromatic
+    const monoLight = hslToHex(h, Math.max(12, s - 30), isFormal ? Math.min(90, l + 30) : Math.min(85, l + 22));
+    const monoDark = hslToHex(h, Math.min(95, s + 10), isFormal ? Math.max(14, l - 30) : Math.max(20, l - 22));
+    addSwatch('monoRow', monoLight, isShirt ? 'Tonal Light Bottom' : 'Tonal Light Top');
+    addSwatch('monoRow', monoDark, isShirt ? 'Tonal Dark Bottom' : 'Tonal Dark Top');
+
+    // 5. Outerwear 3rd Layer Render (Below complete the look)
+    if (chkAddLayer.checked) {
+      outerwearCard.classList.remove('hidden');
+      const layerRow = document.getElementById('layerRow');
+      layerRow.innerHTML = '';
+      
+      if (isFormal) {
+        addSwatch('layerRow', '#162744', 'Navy Hopsack Blazer');
+        addSwatch('layerRow', '#422e23', 'Camel Wool Overcoat');
+        addSwatch('layerRow', '#353b48', 'Charcoal Tailored Suit');
+      } else {
+        addSwatch('layerRow', '#3c5a78', 'Washed Denim Jacket');
+        addSwatch('layerRow', '#5C6744', 'Olive Field Overshirt');
+        addSwatch('layerRow', '#B38B6D', 'Tan Suede Bomber');
+      }
+    } else {
+      outerwearCard.classList.add('hidden');
+    }
+
+    renderAccessories(h, s, l, isFormal);
+  }
+
+  function renderAccessories(h, s, l, isFormal) {
+    const isWarm = (h >= 15 && h <= 170) || (h >= 340);
+    const isDark = l < 35;
+
+    let shoeColorHex, shoeTitle;
+    let beltColorHex;
+    let watchColorHex;
+
+    if (isFormal) {
+      if (isWarm || isDark) {
+        shoeColorHex = "#3b1e15";
+        shoeTitle = "Dark Cognac / Espresso Leather";
+        shoeDetails.textContent = "Cap-toe Oxfords or Chelsea boots";
+        
+        beltColorHex = "#3b1e15";
+        beltName.textContent = "Matched Dark Cognac Leather";
+        beltDetails.textContent = "Smooth dress finish with silver/brass buckle";
+
+        watchColorHex = "#C5A059";
+        watchName.textContent = "Gold / Warm Steel Case";
+        watchDetails.textContent = "Dark brown leather strap or gold bracelet";
+      } else {
+        shoeColorHex = "#1a1a1a";
+        shoeTitle = "Classic Jet Black Boxcalf";
+        shoeDetails.textContent = "Formal Derby, Oxford, or Monkstraps";
+
+        beltColorHex = "#1a1a1a";
+        beltName.textContent = "Matched Black Dress Leather";
+        beltDetails.textContent = "Clean polished silver rectangular buckle";
+
+        watchColorHex = "#c0c0c0";
+        watchName.textContent = "Silver Stainless Steel";
+        watchDetails.textContent = "Black leather strap or silver link bracelet";
+      }
+    } else {
+      if (l > 55) {
+        shoeColorHex = "#ffffff";
+        shoeTitle = "Clean White Minimalist Leather";
+        shoeDetails.textContent = "Low-top court sneakers or suede loafers";
+
+        beltColorHex = "#a8794c";
+        beltName.textContent = "Woven Tan / Camel Leather";
+        beltDetails.textContent = "Casual woven leather or suede belt";
+
+        watchColorHex = "#8B5A2B";
+        watchName.textContent = "Tan Leather / Field Watch";
+        watchDetails.textContent = "Matte steel case with canvas or tan strap";
+      } else {
+        shoeColorHex = "#5c4033";
+        shoeTitle = "Snuff Suede / Desert Boots";
+        shoeDetails.textContent = "Loafers, retro trainers, or suede Chelseas";
+
+        beltColorHex = "#5c4033";
+        beltName.textContent = "Matching Suede / Raw Edge Leather";
+        beltDetails.textContent = "Brushed antique brass or gunmetal buckle";
+
+        watchColorHex = "#708090";
+        watchName.textContent = "Chronograph / Gunmetal";
+        watchDetails.textContent = "Textured suede strap or titanium bracelet";
+      }
+    }
+
+    shoeDot.style.backgroundColor = shoeColorHex;
+    shoeName.textContent = shoeTitle;
+    beltDot.style.backgroundColor = beltColorHex;
+    watchDot.style.backgroundColor = watchColorHex;
+  }
+
+  drawWheel(0);
+
+  function rgbToHSL(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+    if (max === min) { h = s = 0; } 
+    else {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+  }
+
+  function hslToHex(h, s, l) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+      return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  function rgbToHex(r, g, b) {
+    return "#" + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToRGB(hex) {
+    return {
+      r: parseInt(hex.slice(1, 3), 16),
+      g: parseInt(hex.slice(3, 5), 16),
+      b: parseInt(hex.slice(5, 7), 16)
+    };
+  }
+</script>
+
+</body>
+</html>
